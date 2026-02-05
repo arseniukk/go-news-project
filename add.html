@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Додати нову новину</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 50px; }
+        .form-box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h1 { text-align: center; color: #2c3e50; }
+        label { display: block; margin: 15px 0 5px; font-weight: bold; }
+        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .error { color: white; background: #e74c3c; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
+        button { width: 100%; background: #2c3e50; color: white; border: none; padding: 12px; margin-top: 20px; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .back { display: block; text-align: center; margin-top: 15px; color: #3498db; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<div class="form-box">
+    <h1>Нова новина</h1>
+
+    {{if .Error}}
+        <div class="error">{{.Error}}</div>
+    {{end}}
+
+    <form action="/add" method="POST">
+        <label>Заголовок:</label>
+        <input type="text" name="title" value="{{if .Data}}{{.Data.Title}}{{end}}">
+
+        <label>Категорія:</label>
+        <select name="category">
+            <option value="Технології">Технології</option>
+            <option value="Події">Події</option>
+            <option value="Спорт">Спорт</option>
+        </select>
+
+        <label>Зміст:</label>
+        <textarea name="content" rows="4">{{if .Data}}{{.Data.Content}}{{end}}</textarea>
+
+        <label>Дата:</label>
+        <input type="date" name="date" value="{{if .Data}}{{.Data.Date}}{{end}}">
+
+        <label style="font-weight: normal; margin-top: 15px;">
+            <input type="checkbox" name="is_hot" style="width: auto;"> Термінова новина
+        </label>
+
+        <button type="submit">Опублікувати</button>
+    </form>
+    
+    <a href="/" class="back">← Скасувати та повернутися</a>
+</div>
+
+</body>
+</html>

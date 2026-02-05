@@ -2,116 +2,23 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.PageTitle}}</title>
-    <!-- Підключаємо гарний шрифт -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #2c3e50;
-            --accent: #e74c3c;
-            --bg: #f8f9fa;
-            --text: #333;
-        }
-
-        body { 
-            font-family: 'Roboto', sans-serif; 
-            margin: 0; 
-            background-color: var(--bg); 
-            color: var(--text);
-        }
-
-        header {
-            background: var(--primary);
-            color: white;
-            padding: 1rem 0;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        nav {
-            background: #fff;
-            padding: 10px;
-            text-align: center;
-            border-bottom: 1px solid #ddd;
-        }
-
-        nav a {
-            margin: 0 15px;
-            text-decoration: none;
-            color: var(--primary);
-            font-weight: bold;
-            font-size: 0.9em;
-        }
-
-        .container { 
-            max-width: 900px; 
-            margin: 30px auto; 
-            padding: 0 20px; 
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-        }
-
-        .card-content {
-            padding: 20px;
-            flex-grow: 1;
-        }
-
-        .badge {
-            display: inline-block;
-            background: var(--accent);
-            color: white;
-            padding: 3px 8px;
-            font-size: 10px;
-            border-radius: 5px;
-            text-transform: uppercase;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .category {
-            font-size: 12px;
-            color: #3498db;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        h2 { 
-            font-family: 'Montserrat', sans-serif;
-            font-size: 1.2em; 
-            margin: 10px 0;
-            color: var(--primary);
-        }
-
-        .date { font-size: 0.8em; color: #999; margin-bottom: 15px; }
-
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: #888;
-            font-size: 0.9em;
-            margin-top: 40px;
-            border-top: 1px solid #ddd;
-        }
+        :root { --primary: #2c3e50; --accent: #e74c3c; --bg: #f8f9fa; }
+        body { font-family: 'Roboto', sans-serif; margin: 0; background-color: var(--bg); }
+        header { background: var(--primary); color: white; padding: 20px; text-align: center; }
+        nav { background: #fff; padding: 15px; text-align: center; border-bottom: 1px solid #ddd; }
+        nav a { margin: 0 15px; text-decoration: none; color: var(--primary); font-weight: bold; }
+        .btn-add { display: inline-block; background: var(--accent); color: white; padding: 12px 25px; 
+                   text-decoration: none; border-radius: 5px; font-weight: bold; margin: 20px 0; }
+        .container { max-width: 1000px; margin: auto; padding: 0 20px; text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; text-align: left; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .badge { background: var(--accent); color: white; padding: 3px 7px; font-size: 11px; border-radius: 4px; text-transform: uppercase; }
+        .category { color: #3498db; font-size: 12px; font-weight: bold; }
+        h2 { font-family: 'Montserrat'; font-size: 1.2em; color: var(--primary); }
+        footer { margin-top: 50px; padding: 20px; color: #888; border-top: 1px solid #ddd; }
     </style>
 </head>
 <body>
@@ -128,26 +35,24 @@
 </nav>
 
 <div class="container">
+    <!-- Кнопка додавання -->
+    <a href="/add" class="btn-add">+ ДОДАТИ НОВИНУ</a>
+
     <div class="grid">
         {{range .Articles}}
         <div class="card">
-            <div class="card-content">
-                {{if .IsHot}}<span class="badge">Терміново</span>{{end}}
-                <div class="category">{{.Category}}</div>
-                <h2>{{.Title}}</h2>
-                <div class="date">📅 {{.Date}}</div>
-                <p>{{.Content}}</p>
-            </div>
+            {{if .IsHot}}<span class="badge">Терміново</span>{{end}}
+            <div class="category">{{.Category}}</div>
+            <h2>{{.Title}}</h2>
+            <div style="font-size: 0.8em; color: #999;">📅 {{.Date}}</div>
+            <p>{{.Content}}</p>
         </div>
         {{else}}
-        <p>Наразі новин немає.</p>
+        <p>Новин за цим запитом не знайдено.</p>
         {{end}}
     </div>
 </div>
 
-<footer>
-    &copy; {{.Year}} Новини Головного. Всі права захищені.
-</footer>
-
+<footer>&copy; {{.Year}} Новини Головного</footer>
 </body>
 </html>

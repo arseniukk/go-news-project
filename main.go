@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// NewsArticle описує новину
 type NewsArticle struct {
 	ID       int
 	Title    string
@@ -17,66 +18,114 @@ type NewsArticle struct {
 	IsHot    bool
 }
 
+// PageData для головної сторінки
 type PageData struct {
 	PageTitle string
 	Articles  []NewsArticle
-	Year      int // Для автоматичного підвалу сайту
+	Year      int
 }
 
+// FormResponse для сторінки додавання (передача помилок)
+type FormResponse struct {
+	Error string
+	Data  NewsArticle
+}
+
+// Глобальна змінна (база даних у пам'яті)
+var articles = []NewsArticle{
+	{1, "Перша новина порталу", "Вітаємо на нашому новому двигуні Go!", "Події", "2026-02-05", true},
+}
+
+// Головна сторінка
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == "/favicon.ico" {
-		return
+	if r.URL.Path != "/" {
+		// Якщо шлях не знайдено, ми не робимо нічого (це не дасть фавікону заважати)
+		if r.URL.Path == "/favicon.ico" {
+			return
+		}
 	}
 
-	// 1. Отримуємо категорію з URL
 	categoryFilter := r.URL.Query().Get("category")
+	var filtered []NewsArticle
 
-	// Повний список новин
-	allArticles := []NewsArticle{
-		{1, "Go 1.22: Революція у шаблонах", "Нова версія мови приносить ще більше швидкості у рендеринг сторінок.", "Технології", "05.02.2026", true},
-		{2, "Київ стає цифровим хабом", "За останній рік кількість ІТ-стартапів зросла на 30%.", "Події", "04.02.2026", false},
-		{3, "Майбутнє штучного інтелекту", "Чи замінить ШІ програмістів у 2026 році? Думки експертів.", "Технології", "03.02.2026", false},
-		{4, "Спортивні досягнення тижня", "Українські атлети здобули 5 золотих медалей на міжнародних змаганнях.", "Спорт", "02.02.2026", true},
-	}
-
-	// 2. Фільтруємо новини, якщо категорія обрана
-	var filteredArticles []NewsArticle
 	if categoryFilter != "" {
-		for _, a := range allArticles {
+		for _, a := range articles {
 			if a.Category == categoryFilter {
-				filteredArticles = append(filteredArticles, a)
+				filtered = append(filtered, a)
 			}
 		}
 	} else {
-		// Якщо категорія не обрана, показуємо всі новини
-		filteredArticles = allArticles
+		filtered = articles
 	}
 
-	// 3. Передаємо відфільтровані новини в шаблон
 	data := PageData{
 		PageTitle: "Новини Головного",
-		Articles:  filteredArticles,
+		Articles:  filtered,
 		Year:      time.Now().Year(),
 	}
 
 	tmpl, err := template.ParseFiles("index.html")
 	if err != nil {
-		log.Printf("Помилка шаблону: %v", err)
-		http.Error(w, "Помилка сервера", 500)
+		log.Printf("Помилка index.html: %v", err)
 		return
 	}
-
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	tmpl.Execute(w, data)
 }
+
+// Сторінка додавання новини
+func addNewsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		tmpl, err := template.ParseFiles("add.html")
+		if err != nil {
+			log.Printf("Помилка add.html: %v", err)
+			http.Error(w, "Файл add.html не знайдено", 500)
+			return
+		}
+		tmpl.Execute(w, nil)
+		return
+	}
+
+	if r.Method == "POST" {
+		// Отримуємо дані з форми
+		title := r.FormValue("title")
+		category := r.FormValue("category")
+		content := r.FormValue("content")
+		date := r.FormValue("date")
+		isHot := r.FormValue("is_hot") == "on"
+
+		// Валідація
+		if title == "" || content == "" || date == "" {
+			tmpl, _ := template.ParseFiles("add.html")
+			tmpl.Execute(w, FormResponse{
+				Error: "Заповніть, будь ласка, всі поля!",
+				Data:  NewsArticle{Title: title, Content: content, Date: date},
+			})
+			return
+		}
+
+		// Додаємо новину
+		newArticle := NewsArticle{
+			ID:       len(articles) + 1,
+			Title:    title,
+			Content:  content,
+			Category: category,
+			Date:     date,
+			IsHot:    isHot,
+		}
+		// Додаємо в початок списку
+		articles = append([]NewsArticle{newArticle}, articles...)
+
+		// Редирект на головну
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+}
+
 func main() {
 	http.HandleFunc("/", homeHandler)
+	http.HandleFunc("/add", addNewsHandler) // Шлях до форми
 
-	fmt.Println("Сервер намагається запуститися на http://localhost:8081") // Змінимо на 8081 для перевірки
-
-	// Додаємо логування помилки
-	err := http.ListenAndServe(":8081", nil)
-	if err != nil {
-		log.Fatal("Сервер не зміг запуститися: ", err)
-	}
+	port := ":9000"
+	fmt.Printf("Сервер запущено: http://localhost%s\n", port)
+	log.Fatal(http.ListenAndServe(port, nil))
 }
