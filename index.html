@@ -2,57 +2,96 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>{{.PageTitle}}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewsPro — Новини Головного</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #2c3e50; --accent: #e74c3c; --bg: #f8f9fa; }
-        body { font-family: 'Roboto', sans-serif; margin: 0; background-color: var(--bg); }
-        header { background: var(--primary); color: white; padding: 20px; text-align: center; }
-        nav { background: #fff; padding: 15px; text-align: center; border-bottom: 1px solid #ddd; }
-        nav a { margin: 0 15px; text-decoration: none; color: var(--primary); font-weight: bold; }
-        .btn-add { display: inline-block; background: var(--accent); color: white; padding: 12px 25px; 
-                   text-decoration: none; border-radius: 5px; font-weight: bold; margin: 20px 0; }
-        .container { max-width: 1000px; margin: auto; padding: 0 20px; text-align: center; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; text-align: left; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .badge { background: var(--accent); color: white; padding: 3px 7px; font-size: 11px; border-radius: 4px; text-transform: uppercase; }
-        .category { color: #3498db; font-size: 12px; font-weight: bold; }
-        h2 { font-family: 'Montserrat'; font-size: 1.2em; color: var(--primary); }
-        footer { margin-top: 50px; padding: 20px; color: #888; border-top: 1px solid #ddd; }
+        :root { --primary: #1a1a1a; --accent: #4f46e5; --hot: #ef4444; --bg: #f9fafb; --text: #1f2937; }
+        body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); color: var(--text); }
+        
+        header { background: white; border-bottom: 1px solid #e5e7eb; padding: 20px 0; position: sticky; top: 0; z-index: 100; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .flex-nav { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; font-size: 24px; color: var(--primary); text-decoration: none; }
+        .logo span { color: var(--accent); }
+
+        nav a { text-decoration: none; color: #6b7280; font-weight: 500; margin-left: 20px; transition: 0.2s; }
+        nav a:hover { color: var(--accent); }
+
+        .hero { background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%); color: white; padding: 60px 0; border-radius: 0 0 40px 40px; margin-bottom: 40px; }
+        .hero h1 { font-size: 42px; margin: 0; letter-spacing: -1.5px; }
+
+        .layout { display: grid; grid-template-columns: 2.5fr 1fr; gap: 30px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        
+        .card { background: white; border-radius: 16px; padding: 24px; border: 1px solid #eee; transition: 0.3s; position: relative; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.05); }
+        
+        .badge { background: #fee2e2; color: var(--hot); font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; }
+        .cat { color: var(--accent); font-weight: 700; font-size: 11px; text-transform: uppercase; display: block; margin-top: 10px; }
+        h2 { font-size: 18px; margin: 10px 0; line-height: 1.4; }
+        .preview { font-size: 14px; color: #6b7280; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        
+        .card-actions { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f3f4f6; padding-top: 15px; }
+        .btn-view { text-decoration: none; color: var(--accent); font-weight: 600; font-size: 14px; }
+        .btn-del { text-decoration: none; color: #9ca3af; font-size: 12px; }
+        .btn-del:hover { color: var(--hot); }
+
+        aside { background: white; padding: 24px; border-radius: 16px; height: fit-content; border: 1px solid #eee; }
+        code { display: block; background: #f3f4f6; padding: 8px; border-radius: 6px; font-size: 12px; margin: 10px 0; }
+
+        footer { text-align: center; padding: 40px; color: #9ca3af; font-size: 13px; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>{{.PageTitle}}</h1>
+    <div class="container flex-nav">
+        <a href="/" class="logo">NEWS<span>PRO</span></a>
+        <nav>
+            <a href="/">Всі</a>
+            <a href="/?category=Технології">Технології</a>
+            <a href="/?category=Спорт">Спорт</a>
+            <a href="/?category=Події">Події</a>
+            <a href="/add" style="color: var(--accent);">Додати +</a>
+        </nav>
+    </div>
 </header>
 
-<nav>
-    <a href="/">ГОЛОВНА</a>
-    <a href="/?category=Технології">ТЕХНОЛОГІЇ</a>
-    <a href="/?category=Події">ПОДІЇ</a>
-    <a href="/?category=Спорт">СПОРТ</a>
-</nav>
-
-<div class="container">
-    <!-- Кнопка додавання -->
-    <a href="/add" class="btn-add">+ ДОДАТИ НОВИНУ</a>
-
-    <div class="grid">
-        {{range .Articles}}
-        <div class="card">
-            {{if .IsHot}}<span class="badge">Терміново</span>{{end}}
-            <div class="category">{{.Category}}</div>
-            <h2>{{.Title}}</h2>
-            <div style="font-size: 0.8em; color: #999;">📅 {{.Date}}</div>
-            <p>{{.Content}}</p>
-        </div>
-        {{else}}
-        <p>Новин за цим запитом не знайдено.</p>
-        {{end}}
+<div class="hero">
+    <div class="container">
+        <h1>Професійний погляд <br>на світ розробки.</h1>
+        <p>REST API проект на мові Go</p>
     </div>
 </div>
 
-<footer>&copy; {{.Year}} Новини Головного</footer>
+<div class="container layout">
+    <main class="grid">
+        {{range .Articles}}
+        <div class="card">
+            {{if .IsHot}}<span class="badge">Гаряче</span>{{end}}
+            <span class="cat">{{.Category}}</span>
+            <h2>{{.Title}}</h2>
+            <p class="preview">{{.Content}}</p>
+            <div class="card-actions">
+                <a href="/news?id={{.ID}}" class="btn-view">Читати далі →</a>
+                <a href="/delete?id={{.ID}}" class="btn-del">Видалити 🗑️</a>
+            </div>
+        </div>
+        {{else}}
+        <p>Новин не знайдено.</p>
+        {{end}}
+    </main>
+
+    <aside>
+        <h3>REST API Документація</h3>
+        <p style="font-size: 13px;">Дані доступні у JSON форматі:</p>
+        <code>GET /api/news</code>
+        <a href="/api/news" target="_blank" style="font-size: 13px; color: var(--accent);">Переглянути JSON результат →</a>
+    </aside>
+</div>
+
+<footer>&copy; {{.Year}} NewsPro Portal.</footer>
+
 </body>
 </html>

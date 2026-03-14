@@ -1,45 +1,41 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
-// NewsArticle описує новину
+// NewsArticle описує новину (з тегами для JSON)
 type NewsArticle struct {
-	ID       int
-	Title    string
-	Content  string
-	Category string
-	Date     string
-	IsHot    bool
+	ID       int    `json:"id"`
+	Title    string `json:"title"`
+	Content  string `json:"content"`
+	Category string `json:"category"`
+	Date     string `json:"date"`
+	IsHot    bool   `json:"is_hot"`
 }
 
-// PageData для головної сторінки
-type PageData struct {
-	PageTitle string
-	Articles  []NewsArticle
-	Year      int
-}
-
-// FormResponse для сторінки додавання (передача помилок)
-type FormResponse struct {
-	Error string
-	Data  NewsArticle
-}
-
-// Глобальна змінна (база даних у пам'яті)
+// Глобальний список новин (імітація бази даних для звіту)
 var articles = []NewsArticle{
-	{1, "Перша новина порталу", "Вітаємо на нашому новому двигуні Go!", "Події", "2026-02-05", true},
+	{1, "Go 1.24: Майбутнє системного програмування", "Розробники анонсували нові інструменти для оптимізації пам'яті та покращену роботу з хмарою.", "Технології", "2026-02-09", true},
+	{2, "Відкриття інноваційного парку в Києві", "Новий простір для стартапів відкриває двері вже наступного місяця. Очікується понад 100 резидентів.", "Події", "2026-02-08", false},
+	{3, "Українська збірна виборола золото", "Наші атлети продемонстрували неймовірну волю до перемоги та здобули рекордну кількість медалей.", "Спорт", "2026-02-07", true},
+	{4, "Штучний інтелект у медіа", "Як сучасні алгоритми допомагають журналістам швидше обробляти великі масиви даних та створювати контент.", "Технології", "2026-02-06", false},
+	{5, "Благодійний марафон", "Тисячі учасників зареєструвалися на забіг, щоб зібрати кошти на підтримку освітніх проєктів.", "Спорт", "2026-02-05", false},
 }
 
-// Головна сторінка
+var lastID = 5 // Лічильник для нових ID
+
+// --- КЛАСИЧНІ ОБРОБНИКИ (HTML) ---
+
+// Головна сторінка з фільтрацією
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		// Якщо шлях не знайдено, ми не робимо нічого (це не дасть фавікону заважати)
 		if r.URL.Path == "/favicon.ico" {
 			return
 		}
@@ -58,74 +54,88 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		filtered = articles
 	}
 
-	data := PageData{
-		PageTitle: "Новини Головного",
-		Articles:  filtered,
-		Year:      time.Now().Year(),
-	}
+	data := struct {
+		Articles []NewsArticle
+		Year     int
+	}{Articles: filtered, Year: time.Now().Year()}
 
-	tmpl, err := template.ParseFiles("index.html")
-	if err != nil {
-		log.Printf("Помилка index.html: %v", err)
-		return
-	}
+	tmpl, _ := template.ParseFiles("index.html")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	tmpl.Execute(w, data)
 }
 
-// Сторінка додавання новини
+// Перегляд окремої новини
+func viewHandler(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.Atoi(r.URL.Query().Get("id"))
+	var article NewsArticle
+	found := false
+	for _, a := range articles {
+		if a.ID == id {
+			article = a
+			found = true
+			break
+		}
+	}
+	if !found {
+		http.NotFound(w, r)
+		return
+	}
+	tmpl, _ := template.ParseFiles("view.html")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	tmpl.Execute(w, article)
+}
+
+// Видалення новини (з сайту)
+func deleteHandler(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.Atoi(r.URL.Query().Get("id"))
+	for i, a := range articles {
+		if a.ID == id {
+			articles = append(articles[:i], articles[i+1:]...)
+			break
+		}
+	}
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+// Додавання через форму
 func addNewsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		tmpl, err := template.ParseFiles("add.html")
-		if err != nil {
-			log.Printf("Помилка add.html: %v", err)
-			http.Error(w, "Файл add.html не знайдено", 500)
-			return
-		}
+		tmpl, _ := template.ParseFiles("add.html")
 		tmpl.Execute(w, nil)
 		return
 	}
-
 	if r.Method == "POST" {
-		// Отримуємо дані з форми
-		title := r.FormValue("title")
-		category := r.FormValue("category")
-		content := r.FormValue("content")
-		date := r.FormValue("date")
-		isHot := r.FormValue("is_hot") == "on"
-
-		// Валідація
-		if title == "" || content == "" || date == "" {
-			tmpl, _ := template.ParseFiles("add.html")
-			tmpl.Execute(w, FormResponse{
-				Error: "Заповніть, будь ласка, всі поля!",
-				Data:  NewsArticle{Title: title, Content: content, Date: date},
-			})
-			return
+		lastID++
+		newArt := NewsArticle{
+			ID:       lastID,
+			Title:    r.FormValue("title"),
+			Content:  r.FormValue("content"),
+			Category: r.FormValue("category"),
+			Date:     r.FormValue("date"),
+			IsHot:    r.FormValue("is_hot") == "on",
 		}
-
-		// Додаємо новину
-		newArticle := NewsArticle{
-			ID:       len(articles) + 1,
-			Title:    title,
-			Content:  content,
-			Category: category,
-			Date:     date,
-			IsHot:    isHot,
-		}
-		// Додаємо в початок списку
-		articles = append([]NewsArticle{newArticle}, articles...)
-
-		// Редирект на головну
+		articles = append([]NewsArticle{newArt}, articles...)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 }
 
-func main() {
-	http.HandleFunc("/", homeHandler)
-	http.HandleFunc("/add", addNewsHandler) // Шлях до форми
+// --- REST API ОБРОБНИКИ (JSON) ---
 
-	port := ":9000"
-	fmt.Printf("Сервер запущено: http://localhost%s\n", port)
-	log.Fatal(http.ListenAndServe(port, nil))
+func getNewsAPI(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(articles)
+}
+
+func main() {
+	// Маршрути інтерфейсу
+	http.HandleFunc("/", homeHandler)
+	http.HandleFunc("/news", viewHandler)
+	http.HandleFunc("/add", addNewsHandler)
+	http.HandleFunc("/delete", deleteHandler)
+
+	// Маршрути API (ПР №4)
+	http.HandleFunc("/api/news", getNewsAPI)
+
+	fmt.Println("Сервер запущено: http://localhost:9000")
+	log.Fatal(http.ListenAndServe(":9000", nil))
 }
