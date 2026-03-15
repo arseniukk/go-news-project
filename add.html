@@ -39,7 +39,8 @@
 
         <label>Дата:</label>
         <input type="date" name="date" value="{{if .Data}}{{.Data.Date}}{{end}}">
-
+        <label>Посилання на картинку (URL):</label>
+        <input type="text" name="image_url" placeholder="https://example.com/image.jpg"> 
         <label style="font-weight: normal; margin-top: 15px;">
             <input type="checkbox" name="is_hot" style="width: auto;"> Термінова новина
         </label>

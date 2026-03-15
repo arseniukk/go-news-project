@@ -16,12 +16,12 @@
 </head>
 <body>
     <div class="container">
-        <span class="category">{{.Category}}</span>
-        <h1>{{.Title}}</h1>
-        <div class="meta">Опубліковано: {{.Date}} | ID: {{.ID}}</div>
-        <p>{{.Content}}</p>
-        <p>Тут міг би бути дуже довгий текст новини, але наш додаток на Go поки що використовує короткі описи для демонстрації роботи REST API та шаблонізатора.</p>
-        <a href="/" class="back">← Назад до списку новин</a>
-    </div>
+    <img src="{{.ImageURL}}" style="width: 100%; height: 350px; object-fit: cover; border-radius: 20px; margin-bottom: 25px;">
+    <span class="category">{{.Category}}</span>
+    <h1>{{.Title}}</h1>
+    <div class="meta">Опубліковано: {{.Date}} | 👁 Переглядів: {{.Views}}</div>
+    <p>{{.Content}}</p>
+    <a href="/" class="back">← Назад до списку новин</a>
+</div>
 </body>
 </html>
